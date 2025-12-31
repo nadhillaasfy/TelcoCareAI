@@ -1,0 +1,13 @@
+# FastAPI and web framework
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
+
+# ML and data processing
+scikit-learn
+numpy
+joblib
+
+# Utilities
+python-dotenv
