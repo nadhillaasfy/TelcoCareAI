@@ -1,0 +1,43 @@
+{
+  "_metadata": {
+    "description": "Cluster to urgency/priority mapping configuration",
+    "version": "1.0",
+    "last_updated": "2025-12-31",
+    "total_clusters": 4,
+    "notes": "Based on K-Means clustering analysis with 96-99% F1-scores"
+  },
+  "clusters": {
+    "0": {
+      "urgency": "Low",
+      "priority": "P3",
+      "description": "Positive responses, thanks, feedback, general information requests",
+      "keywords": ["thanks", "feedback", "help", "great", "store"],
+      "typical_response_time": "24-48 hours",
+      "auto_escalate": false
+    },
+    "1": {
+      "urgency": "Low",
+      "priority": "P3",
+      "description": "Greetings, assistance inquiries, general help requests",
+      "keywords": ["thank", "hello", "assistance", "reaching", "kindly"],
+      "typical_response_time": "24-48 hours",
+      "auto_escalate": false
+    },
+    "2": {
+      "urgency": "Medium",
+      "priority": "P2",
+      "description": "Follow-ups, data submission requests, status checks via DM",
+      "keywords": ["dm", "send", "address", "email", "assist"],
+      "typical_response_time": "4-8 hours",
+      "auto_escalate": false
+    },
+    "3": {
+      "urgency": "High",
+      "priority": "P1",
+      "description": "Critical complaints, service outages, urgent issues causing customer loss",
+      "keywords": ["sorry", "service", "time", "dont", "need"],
+      "typical_response_time": "1-2 hours",
+      "auto_escalate": true
+    }
+  }
+}

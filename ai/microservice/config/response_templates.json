@@ -1,0 +1,28 @@
+{
+  "_metadata": {
+    "description": "Fallback response templates for when LLM API is unavailable",
+    "version": "1.0",
+    "last_updated": "2025-12-31",
+    "usage": "These templates are used as backup responses when LLM integration fails"
+  },
+  "templates": {
+    "Low": {
+      "summary": "Respon positif atau pertanyaan informatif umum yang membutuhkan jawaban standar (harga/info).",
+      "reply": "Halo Kak, senang bisa membantu! Jika ada pertanyaan lebih lanjut, jangan ragu hubungi kami lagi. Selamat beraktivitas!",
+      "tone": "friendly",
+      "estimated_satisfaction": "high"
+    },
+    "Medium": {
+      "summary": "Pelanggan melanjutkan proses atau mengirim data melalui DM/meminta cek status.",
+      "reply": "Baik Kak, terima kasih sudah mengirimkan data/informasi yang dibutuhkan. Saat ini tim kami sedang memproses datanya. Mohon ditunggu update dari kami ya, Kak.",
+      "tone": "professional",
+      "estimated_satisfaction": "medium"
+    },
+    "High": {
+      "summary": "Keluhan kritis dan gangguan layanan (sinyal/internet) total yang memicu kerugian pelanggan.",
+      "reply": "Mohon maaf yang sebesar-besarnya atas ketidaknyamanan fatal ini, Kak. Laporan ini telah kami eskalasi sebagai prioritas tertinggi (P1) ke tim teknis untuk segera ditangani. Kami memohon waktu agar kendala segera teratasi.",
+      "tone": "apologetic",
+      "estimated_satisfaction": "low"
+    }
+  }
+}
