@@ -40,7 +40,7 @@ const llmJudgmentSchema = z.object({
     "Brief explanation of why the ML prediction is valid or invalid (1-2 sentences)"
   ),
   customer_response: z.string().describe(
-    "Generated response text for the customer that addresses their issue (2-4 sentences)"
+    "Generated response text for the customer that addresses their issue (2-4 sentences). MUST be written in Indonesian language."
   ),
   recommended_action: z.enum(["escalate", "standard", "automated"]).describe(
     "Recommended action: escalate for high urgency, standard for medium, automated for low"
@@ -85,30 +85,42 @@ RESPONSE GUIDELINES:
 - Medium urgency: Professional, solution-focused
 - Low urgency: Friendly, informative
 
+IMPORTANT: The customer_response field MUST be written in Indonesian language (Bahasa Indonesia).
+Even if the ticket text is provided in English (for ML processing), your response to the customer must be in Indonesian.
+
 Always respond with structured JSON matching the provided schema.`;
 
 /**
  * Build complete prompt with system instruction and user input
+ * Includes both original Indonesian text and English translation for context
  */
-const buildPrompt = (ticketText: string, mlPrediction: MLPrediction): string => {
+const buildPrompt = (
+  originalText: string,
+  translatedText: string,
+  mlPrediction: MLPrediction
+): string => {
   return `${SYSTEM_INSTRUCTION}
 
-CUSTOMER TICKET:
-"${ticketText}"
+CUSTOMER TICKET (Original Indonesian):
+"${originalText}"
 
-ML PREDICTION:
+CUSTOMER TICKET (English translation for ML processing):
+"${translatedText}"
+
+ML PREDICTION (based on English translation):
 - Cluster: ${mlPrediction.cluster}
 - Urgency: ${mlPrediction.urgency}
 - Priority: ${mlPrediction.priority}
 - Confidence: ${(mlPrediction.confidence * 100).toFixed(1)}%
 - Auto-escalate: ${mlPrediction.auto_escalate}
 
-Evaluate this prediction and generate a customer response.`;
+Evaluate this prediction and generate a customer response in Indonesian.`;
 };
 
 export class GeminiClient {
   async judgeAndRespond(
-    ticketText: string,
+    originalText: string,
+    translatedText: string,
     mlPrediction: MLPrediction,
     ticketId?: string
   ): Promise<{ judgment: LLMJudgmentResponse; processingTimeMs: number }> {
@@ -120,7 +132,7 @@ export class GeminiClient {
         model: GEMINI_MODEL,
       });
 
-      const prompt = buildPrompt(ticketText, mlPrediction);
+      const prompt = buildPrompt(originalText, translatedText, mlPrediction);
 
       // Convert Zod schema to JSON Schema
       const jsonSchema = zodToJsonSchema(llmJudgmentSchema as any);
