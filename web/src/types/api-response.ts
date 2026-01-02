@@ -28,6 +28,7 @@ export interface LLMJudgeSuccessResponse {
   customer_response: string;
 
   // Processing metadata
+  translation_processing_time_ms: number;
   ml_processing_time_ms: number;
   llm_processing_time_ms: number;
   total_processing_time_ms: number;
@@ -38,7 +39,7 @@ export interface LLMJudgeSuccessResponse {
 export interface LLMJudgeErrorResponse {
   error: string;
   error_message: string;
-  error_stage: "validation" | "ml_service" | "gemini" | "processing";
+  error_stage: "validation" | "translation" | "ml_service" | "gemini" | "processing";
   error_details?: string;
   timestamp: string;
 }
