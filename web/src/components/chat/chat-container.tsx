@@ -71,7 +71,7 @@ export function ChatContainer() {
 
     try {
       // Call API
-      const response = await sendChatMessage(text);
+      const apiResponse = await sendChatMessage(text);
 
       // Update user message to "sent"
       setMessages((prev) =>
@@ -80,13 +80,14 @@ export function ChatContainer() {
         )
       );
 
-      // Add AI response
+      // Add AI response with escalation metadata
       const aiMessage: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: response, // Only customer_response (Indonesian)
+        content: apiResponse.response, // Indonesian customer response
         timestamp: new Date(),
         status: "sent",
+        escalation: apiResponse.escalation, // Include escalation metadata
       };
 
       setMessages((prev) => [...prev, aiMessage]);
