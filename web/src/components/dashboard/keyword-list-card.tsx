@@ -82,14 +82,14 @@ export function KeywordListCard({ keywords, loading = false }: KeywordListCardPr
               className="flex justify-between items-center py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <span className="text-xs font-medium text-muted-foreground w-6 flex-shrink-0">
+                <span className="text-xs font-medium text-muted-foreground w-6 shrink-0">
                   #{index + 1}
                 </span>
                 <span className={dashboardTokens.text.metric + " truncate"}>
                   {kw.keyword}
                 </span>
               </div>
-              <Badge variant="secondary" className="tabular-nums ml-3 flex-shrink-0">
+              <Badge variant="secondary" className="tabular-nums ml-3 shrink-0">
                 {formatNumber(kw.ticket_count)}
               </Badge>
             </div>
