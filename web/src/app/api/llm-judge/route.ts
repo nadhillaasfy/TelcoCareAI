@@ -193,6 +193,9 @@ export async function POST(request: NextRequest) {
       // Customer response
       customer_response: llmResult.judgment.customer_response,
 
+      // LLM-extracted keywords
+      llm_keywords: llmResult.judgment.keywords,
+
       // Performance metrics (convert to integers for database)
       translation_time_ms: Math.round(translationResult.processingTimeMs),
       ml_processing_time_ms: Math.round(mlResponse.processing_time_ms || 0),

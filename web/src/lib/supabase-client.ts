@@ -45,6 +45,9 @@ export interface TicketResultRow {
   // Customer response
   customer_response: string;
 
+  // LLM-extracted keywords (optional - used for processing, not saved to ticket_results)
+  llm_keywords?: string[];
+
   // Performance metrics (milliseconds)
   translation_time_ms: number;
   ml_processing_time_ms: number;
@@ -66,10 +69,13 @@ export interface TicketResultRow {
  */
 export async function saveTicketResult(data: TicketResultRow): Promise<void> {
   try {
+    // Extract llm_keywords separately (not saved to ticket_results table)
+    const { llm_keywords, ...ticketData } = data;
+
     // 1. Save ticket result and get the inserted ID
     const { data: insertedData, error: insertError } = await supabase
       .from('ticket_results')
-      .insert(data)
+      .insert(ticketData)
       .select('id')
       .single();
 
@@ -90,16 +96,64 @@ export async function saveTicketResult(data: TicketResultRow): Promise<void> {
       category: data.llm_issue_category,
     });
 
-    // 2. Extract keywords from the original Indonesian text
+    // 2. Process keywords (LLM-based with rule-based fallback)
     try {
-      const keywords = extractKeywordsAndPhrases(data.ticket_text, {
-        maxKeywords: 7,
-        maxBigrams: 3,
-        minLength: 3,
-      });
+      let keywords: Array<{ keyword: string; frequency: number }> = [];
+      let keywordSource = 'none';
 
+      // Strategy 1: Use LLM-extracted keywords if available
+      if (llm_keywords && Array.isArray(llm_keywords) && llm_keywords.length > 0) {
+        // Validate and clean LLM keywords
+        const validKeywords = llm_keywords
+          .filter(kw => typeof kw === 'string' && kw.trim().length >= 2 && kw.trim().length <= 50)
+          .map(kw => kw.trim().toLowerCase());
+
+        if (validKeywords.length >= 3) {
+          // LLM keywords are semantically important, not frequency-based
+          // Set frequency = 1 for all (represents importance, not occurrence)
+          keywords = validKeywords.map(keyword => ({ keyword, frequency: 1 }));
+          keywordSource = 'llm';
+
+          logger.info('Using LLM-extracted keywords', {
+            ticket_id: data.ticket_id,
+            keyword_count: keywords.length,
+            keywords: keywords.map(k => k.keyword).join(', '),
+          });
+        } else {
+          logger.warn('LLM keywords invalid, falling back to rule-based', {
+            ticket_id: data.ticket_id,
+            llm_keyword_count: llm_keywords.length,
+            valid_keyword_count: validKeywords.length,
+            llm_keywords_raw: llm_keywords,
+          });
+          keywordSource = 'fallback_invalid';
+        }
+      } else {
+        logger.warn('No LLM keywords provided, falling back to rule-based', {
+          ticket_id: data.ticket_id,
+          llm_keywords_type: typeof llm_keywords,
+        });
+        keywordSource = 'fallback_missing';
+      }
+
+      // Strategy 2: Fallback to rule-based extraction if LLM failed
+      if (keywords.length === 0) {
+        keywords = extractKeywordsAndPhrases(data.ticket_text, {
+          maxKeywords: 7,
+          maxBigrams: 3,
+          minLength: 3,
+        });
+        keywordSource = 'rule_based';
+
+        logger.info('Using rule-based keyword extraction (fallback)', {
+          ticket_id: data.ticket_id,
+          keyword_count: keywords.length,
+          keywords: keywords.map(k => k.keyword).join(', '),
+        });
+      }
+
+      // 3. Save keywords to ticket_keywords table
       if (keywords.length > 0) {
-        // 3. Save keywords to ticket_keywords table
         const keywordRows = keywords.map(({ keyword, frequency }) => ({
           ticket_result_id: ticketResultId,
           keyword,
@@ -115,22 +169,27 @@ export async function saveTicketResult(data: TicketResultRow): Promise<void> {
             error: keywordError.message,
             ticket_id: data.ticket_id,
             keyword_count: keywords.length,
+            keyword_source: keywordSource,
           });
-          // Don't throw - keyword save failure shouldn't fail the entire operation
         } else {
-          logger.info('Keywords extracted and saved', {
+          logger.info('Keywords saved to database', {
             ticket_id: data.ticket_id,
             keyword_count: keywords.length,
-            keywords: keywords.map(k => k.keyword).join(', '),
+            keyword_source: keywordSource,
           });
         }
+      } else {
+        logger.warn('No keywords extracted from ticket', {
+          ticket_id: data.ticket_id,
+          keyword_source: keywordSource,
+        });
       }
     } catch (keywordError) {
-      logger.error('Keyword extraction failed', {
+      logger.error('Keyword processing failed', {
         error: keywordError instanceof Error ? keywordError.message : 'Unknown error',
         ticket_id: data.ticket_id,
       });
-      // Don't throw - keyword extraction failure shouldn't fail the entire operation
+      // Don't throw - keyword processing failure shouldn't fail the entire operation
     }
   } catch (error) {
     logger.error('Database save error', {
