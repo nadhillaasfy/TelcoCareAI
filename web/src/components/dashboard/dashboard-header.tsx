@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { dashboardTokens } from "@/lib/dashboard-tokens";
-import { MessageSquare, RotateCw } from "lucide-react";
+import { MessageSquare, RotateCw, List } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { PeriodDays } from "@/types/analytics";
 
 interface DashboardHeaderProps {
@@ -69,6 +70,14 @@ export function DashboardHeader({
             </Button>
           )}
 
+          {/* Link to Tickets Page */}
+          <Link href="/cs-dashboard/tickets">
+            <Button variant="outline" size="sm">
+              <List className="h-4 w-4 mr-2" />
+              Daftar Tiket
+            </Button>
+          </Link>
+
           {/* Link to Chat */}
           <Link href="/">
             <Button variant="ghost" size="sm">
@@ -81,6 +90,3 @@ export function DashboardHeader({
     </div>
   );
 }
-
-// Import cn helper
-import { cn } from "@/lib/utils";
