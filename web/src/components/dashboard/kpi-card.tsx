@@ -7,7 +7,7 @@ interface KpiCardProps {
   label: string;
   value: number | string;
   icon?: LucideIcon;
-  variant?: 'default' | 'primary' | 'destructive' | 'success';
+  variant?: 'default' | 'primary' | 'destructive' | 'warning' | 'success';
   loading?: boolean;
 }
 
@@ -31,6 +31,17 @@ export function KpiCard({ label, value, icon: Icon, variant = 'default', loading
     );
   }
 
+  // Icon styling based on variant
+  const iconStyles = {
+    default: { bg: "bg-primary/10", icon: "text-primary" },
+    primary: { bg: "bg-primary/10", icon: "text-primary" },
+    destructive: { bg: "bg-destructive/10", icon: "text-destructive" },
+    warning: { bg: "bg-amber-100 dark:bg-amber-900/30", icon: "text-amber-600 dark:text-amber-400" },
+    success: { bg: "bg-emerald-100 dark:bg-emerald-900/30", icon: "text-emerald-600 dark:text-emerald-400" },
+  };
+
+  const currentIconStyle = iconStyles[variant];
+
   return (
     <Card className={cn(dashboardTokens.card.kpi, dashboardTokens.kpi[variant])}>
       <CardContent className="pt-5">
@@ -40,8 +51,8 @@ export function KpiCard({ label, value, icon: Icon, variant = 'default', loading
             <p className={cn(dashboardTokens.text.kpiValue, "mt-2")}>{value}</p>
           </div>
           {Icon && (
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Icon className="h-5 w-5 text-primary" />
+            <div className={cn("p-2 rounded-lg", currentIconStyle.bg)}>
+              <Icon className={cn("h-5 w-5", currentIconStyle.icon)} />
             </div>
           )}
         </div>

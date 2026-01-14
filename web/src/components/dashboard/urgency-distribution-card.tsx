@@ -72,8 +72,8 @@ export function UrgencyDistributionCard({ distribution, loading = false }: Urgen
                 )}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <Icon className={cn("h-4 w-4", tokens.text)} />
-                  <span className={cn("text-xs font-medium uppercase tracking-wider", tokens.text)}>
+                  <Icon className={cn("h-4 w-4", tokens.icon)} />
+                  <span className={cn("text-xs font-semibold uppercase tracking-wider", tokens.text)}>
                     {label}
                   </span>
                 </div>

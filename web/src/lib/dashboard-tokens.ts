@@ -47,28 +47,33 @@ export const dashboardTokens = {
     default: "border-border/70",
     primary: "border-primary/30 bg-gradient-to-br from-card to-primary/5",
     destructive: "border-destructive/30 bg-gradient-to-br from-card to-destructive/5",
-    success: "border-accent/30 bg-gradient-to-br from-card to-accent/5",
+    warning: "border-warning/30 bg-gradient-to-br from-card to-warning/5",
+    success: "border-success/30 bg-gradient-to-br from-card to-success/5",
   },
 
   // Urgency color tokens (High/Medium/Low)
+  // Following best practices: Red=Danger, Yellow/Amber=Warning, Green=Safe
   urgency: {
     High: {
       bg: "bg-destructive/10",
       text: "text-destructive",
       border: "border-destructive/30",
-      badge: "bg-destructive text-destructive-foreground",
+      badge: "bg-destructive text-white",
+      icon: "text-destructive",
     },
     Medium: {
-      bg: "bg-accent/10",
-      text: "text-accent",
-      border: "border-accent/30",
-      badge: "bg-accent text-accent-foreground",
+      bg: "bg-amber-50 dark:bg-amber-950/30",
+      text: "text-amber-700 dark:text-amber-400",
+      border: "border-amber-300 dark:border-amber-700",
+      badge: "bg-amber-500 text-white",
+      icon: "text-amber-600 dark:text-amber-400",
     },
     Low: {
-      bg: "bg-muted",
-      text: "text-muted-foreground",
-      border: "border-border",
-      badge: "bg-secondary text-secondary-foreground",
+      bg: "bg-emerald-50 dark:bg-emerald-950/30",
+      text: "text-emerald-700 dark:text-emerald-400",
+      border: "border-emerald-300 dark:border-emerald-700",
+      badge: "bg-emerald-500 text-white",
+      icon: "text-emerald-600 dark:text-emerald-400",
     },
   },
 
