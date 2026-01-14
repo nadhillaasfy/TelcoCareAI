@@ -1,10 +1,12 @@
 /**
- * Chat API Client
+ * API Client
  *
- * Wraps the /api/llm-judge endpoint for chat integration.
- * Returns ONLY customer_response (Indonesian text) - hides ML/LLM technical details.
+ * Wraps API endpoints for chat and ticket management.
  */
 
+import type { TicketListResponse, TicketFilters } from "@/types/ticket";
+
+// ========== Chat API Types ==========
 interface ApiResponse {
   customer_response: string;
   // Escalation fields
@@ -109,4 +111,35 @@ function getUserFriendlyError(error: ApiError): string {
 
   // Fallback to generic error message
   return error.error || 'Terjadi kesalahan. Silakan coba lagi.';
+}
+
+// ========== Ticket API ==========
+
+/**
+ * Fetch tickets with filters
+ *
+ * @param filters - Search, urgency, and category filters
+ * @returns Tickets grouped by urgency level
+ * @throws Error with user-friendly Indonesian message
+ */
+export async function fetchTickets(filters: TicketFilters): Promise<TicketListResponse> {
+  try {
+    const params = new URLSearchParams();
+    if (filters.search) params.set('search', filters.search);
+    if (filters.urgency) params.set('urgency', filters.urgency);
+    if (filters.category) params.set('category', filters.category);
+
+    const response = await fetch(`/api/tickets?${params}`);
+    
+    if (!response.ok) {
+      throw new Error('Gagal memuat daftar tiket');
+    }
+
+    return await response.json();
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Terjadi kesalahan jaringan. Silakan periksa koneksi Anda.');
+  }
 }
