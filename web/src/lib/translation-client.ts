@@ -1,29 +1,30 @@
 /**
- * Hugging Face Translation Client
+ * Translation Client
  *
  * Translates Indonesian text to English for ML model input
- * Uses Helsinki-NLP/opus-mt-id-en model
+ * Uses Gemini for fast, reliable translation
  */
 
-import { InferenceClient } from '@huggingface/inference';
+import { GoogleGenAI } from '@google/genai';
 import { logger } from './logger';
 
-const HF_API_KEY = process.env.HF_API_KEY;
-const TRANSLATION_MODEL = 'Helsinki-NLP/opus-mt-id-en';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-if (!HF_API_KEY) {
-  throw new Error('HF_API_KEY environment variable is not set');
+if (!GEMINI_API_KEY) {
+  throw new Error('GEMINI_API_KEY environment variable is not set');
 }
 
 class TranslationClient {
-  private client: InferenceClient;
+  private ai: GoogleGenAI;
 
   constructor() {
-    this.client = new InferenceClient(HF_API_KEY);
+    this.ai = new GoogleGenAI({
+      apiKey: GEMINI_API_KEY,
+    });
   }
 
   /**
-   * Translate Indonesian text to English
+   * Translate Indonesian text to English using Gemini
    */
   async translateToEnglish(
     text: string,
@@ -34,20 +35,34 @@ class TranslationClient {
     try {
       logger.info('Translating text to English', {
         ticket_id: ticketId,
-        model: TRANSLATION_MODEL,
+        service: 'gemini',
         input_length: text.length,
       });
 
-      const result = await this.client.translation({
-        model: TRANSLATION_MODEL,
-        inputs: text,
+      const prompt = `Translate the following Indonesian text to English. Return ONLY the English translation, no explanations or additional text.
+
+Indonesian text: ${text}
+
+English translation:`;
+
+      const result = await this.ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          temperature: 0.3, // Low temperature for accurate translation
+        }
       });
 
-      const translatedText = result.translation_text;
+      if (!result.text) {
+        throw new Error('Gemini returned empty response');
+      }
+
+      const translatedText = result.text.trim();
       const processingTimeMs = Date.now() - startTime;
 
       logger.info('Translation completed', {
         ticket_id: ticketId,
+        service: 'gemini',
         output_length: translatedText.length,
         elapsed_ms: processingTimeMs,
       });
@@ -58,6 +73,7 @@ class TranslationClient {
 
       logger.error('Translation failed', {
         ticket_id: ticketId,
+        service: 'gemini',
         error: error instanceof Error ? error.message : 'Unknown error',
         elapsed_ms: elapsedMs,
       });
