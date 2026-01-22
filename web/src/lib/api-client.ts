@@ -43,6 +43,13 @@ export interface ChatApiResponse {
  */
 export async function sendChatMessage(text: string): Promise<ChatApiResponse> {
   try {
+    // First, get the next ticket ID
+    const ticketIdResponse = await fetch('/api/next-ticket-id');
+    if (!ticketIdResponse.ok) {
+      throw new Error('Gagal membuat ID tiket');
+    }
+    const { ticket_id } = await ticketIdResponse.json();
+
     const response = await fetch('/api/llm-judge', {
       method: 'POST',
       headers: {
@@ -50,7 +57,7 @@ export async function sendChatMessage(text: string): Promise<ChatApiResponse> {
       },
       body: JSON.stringify({
         text,
-        ticket_id: crypto.randomUUID(),
+        ticket_id,
       }),
     });
 
